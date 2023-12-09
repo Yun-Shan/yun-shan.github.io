@@ -5,3 +5,4 @@ order: 4
 ---
 
 > Nothing
+{: .prompt-tip }
