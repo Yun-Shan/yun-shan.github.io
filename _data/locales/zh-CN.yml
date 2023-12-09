@@ -1,0 +1,6 @@
+copyright:
+  # Shown at the bottom of the post
+  license:
+    template: 本文由作者按照 :LICENSE_NAME 进行授权
+    name: CC BY-NC-SA 4.0
+    link: https://creativecommons.org/licenses/by-nc-sa/4.0/
