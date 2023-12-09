@@ -9,7 +9,7 @@ tags: [杂项]
 {: .prompt-tip }
 
 > 这个提示只在深色模式可见
-{: .dark }{: .prompt-info }
+{: .dark } {: .prompt-info }
 
 > 这个提示只在浅色模式可见
-{: .light }{: .prompt-info }
+{: .light } {: .prompt-info }
