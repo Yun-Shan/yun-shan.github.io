@@ -10,7 +10,9 @@ pin: true
 {: .prompt-tip }
 
 > 这个提示只在深色模式可见
-{: .dark } {: .prompt-info }
+{: .prompt-info }
+{: .dark } 
 
 > 这个提示只在浅色模式可见
-{: .light } {: .prompt-info }
+{: .prompt-info }
+{: .light }
