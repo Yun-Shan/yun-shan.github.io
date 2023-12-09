@@ -16,7 +16,7 @@ timezone: Asia/Shanghai
 
 title: 无关风月 # the main title
 
-tagline: ~ # it will display as the sub-title
+tagline: '' # it will display as the sub-title
 
 description: >- # used by seo meta and the atom feed
   在这里记录各种小玩意
