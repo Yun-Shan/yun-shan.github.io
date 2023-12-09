@@ -14,9 +14,9 @@ timezone: Asia/Shanghai
 # jekyll-seo-tag settings › https://github.com/jekyll/jekyll-seo-tag/blob/master/docs/usage.md
 # ↓ --------------------------
 
-title: 云闪闪的博客 # the main title
+title: 无关风月 # the main title
 
-tagline: '' # it will display as the sub-title
+tagline: ~ # it will display as the sub-title
 
 description: >- # used by seo meta and the atom feed
   在这里记录各种小玩意
