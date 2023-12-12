@@ -2,7 +2,6 @@
 title: Hello World!
 categories: []
 tags: [杂项]
-pin: true
 ---
 
 
