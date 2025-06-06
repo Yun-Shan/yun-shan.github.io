@@ -108,7 +108,7 @@ private void cycleAnimationFrames() {
 第1个参数是midMapLevel，一般不会为动图做midMap，所以一般为0，同时第8个参数midMap也为false  
 第2、3个参数用于纹理偏移(可以理解为数组复制的dstOffset)，通常为0即可(除非有只更新部分纹理的需求)  
 第4、5个参数用于图片偏移(可以理解为数组复制的srcOffset)，根据对应帧在完整图片中的位置提供  
-第6、7个参数为要更新的矩形区域的宽高，也就是每帧的宽高  
+第6、7个参数为要更新的矩形区域的宽高，如果更新整个图片则提供每帧的宽高即可  
 第8个参数标记是否是midMap  
 第9个参数标记是否在上传完毕后自动close nativeImage  
 {: .prompt-tip }
