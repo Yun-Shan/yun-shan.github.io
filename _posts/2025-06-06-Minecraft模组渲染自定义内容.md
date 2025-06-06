@@ -100,7 +100,7 @@ private void cycleAnimationFrames() {
     // 自行处理图片切换逻辑
     // 每次切换图片都应该调用下面的方法来更新材质
     this.bind(); // 这个是父类中的方法
-    nativeImage.upload(0, 0, 0, 0, 0, imgWidth, imgHeight, false, false);
+    nativeImage.upload(0, 0, 0, 0, 0, frameWidth, frameHeight, false, false);
 }
 ```
 
