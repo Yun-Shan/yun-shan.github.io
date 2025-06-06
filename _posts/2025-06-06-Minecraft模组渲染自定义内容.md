@@ -101,7 +101,7 @@ private void cycleAnimationFrames() {
     // 每次切换图片都应该调用下面的方法来更新材质
     this.bind(); // 这个是父类中的方法，每次更新时调用一次来绑定当前要修改的纹理
     nativeImage.upload(0, 0, 0, 0, 0, frameWidth, frameHeight, false, false);
-    // 注意：upload函数最后一个参数必须是false，否则会频繁分配内存，对性能有负面影响。
+    // 注意：upload函数最后一个参数必须是false，否则会自动close导致无法进行下一次更新。
 }
 ```
 > `NativeImage.upload`的参数说明如下：  
