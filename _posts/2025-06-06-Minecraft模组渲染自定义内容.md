@@ -72,8 +72,37 @@ graphics.blit(loc, x, y, width, height, uOffset, vOffset, uWidth, vHeight, textu
 如果需要渲染动态图片，需要新建一个类继承AbstractTexture并实现Tickable，然后在tick函数中处理更新。  
 一个简单的方式是对每个不同的图片都创建一个NativeImage，并记录每个图片显示的tick时长。相关逻辑如下：
 
-在`tick`函数中：  
-tick函数每tick都会被调用一次(正常20tick/s)，自行处理图片切换逻辑，每次切换图片都应该调用`nativeImage.upload(0, 0, 0, 0, 0, imgWidth, imgHeight, false, false);`来更新材质。
+在构造函数中：
+```java
+// this.getId()是父类中的方法
+if (!RenderSystem.isOnRenderThread()) {
+    RenderSystem.recordRenderCall(() -> {
+        TextureUtil.prepareImage(this.getId(), frameWidth, frameHeight);
+    });
+} else {
+    TextureUtil.prepareImage(this.getId(), frameWidth, frameHeight);
+}
+```
+
+在`tick`函数中进行如下的实现(参考了Minecraft原版动态材质的逻辑)：
+```java
+@Override
+public void tick() {
+    // tick函数每tick都会被调用一次(正常20tick/s)
+    if (!RenderSystem.isOnRenderThread()) {
+        RenderSystem.recordRenderCall(this::cycleAnimationFrames);
+    } else {
+        this.cycleAnimationFrames();
+    }
+}
+
+private void cycleAnimationFrames() {
+    // 自行处理图片切换逻辑
+    // 每次切换图片都应该调用下面的方法来更新材质
+    this.bind(); // 这个是父类中的方法
+    nativeImage.upload(0, 0, 0, 0, 0, imgWidth, imgHeight, false, false);
+}
+```
 
 在`close`函数中：  
 对所有nativeImage调用close来释放内存
@@ -83,10 +112,14 @@ tick函数每tick都会被调用一次(正常20tick/s)，自行处理图片切�
 *如果要优化性能，可以将所有不同的帧图片打包进一个png中，然后在更新的时候使用适当的参数从单个png中选择所需的矩形区域。*
 
 > `NativeImage.upload`的参数说明如下：  
-> 第1个参数是midMapLevel，一般不会为动图做midMap，所以一般为0，同时第8个参数midMap也为false  
-> 第2、3个参数用于纹理偏移(可以理解为数组复制的dstOffset)，通常为0即可(除非有只更新部分纹理的需求)  
-> 第4、5个参数用于图片偏移(可以理解为数组复制的srcOffset)，根据对应帧在完整图片中的位置提供  
-> 第6、7个参数为要更新的矩形区域的宽高，也就是每帧的宽高  
-> 第8个参数标记是否是midMap  
-> 第9个参数标记是否在上传完毕后自动close nativeImage  
-> {: .prompt-tip }
+第1个参数是midMapLevel，一般不会为动图做midMap，所以一般为0，同时第8个参数midMap也为false  
+第2、3个参数用于纹理偏移(可以理解为数组复制的dstOffset)，通常为0即可(除非有只更新部分纹理的需求)  
+第4、5个参数用于图片偏移(可以理解为数组复制的srcOffset)，根据对应帧在完整图片中的位置提供  
+第6、7个参数为要更新的矩形区域的宽高，也就是每帧的宽高  
+第8个参数标记是否是midMap  
+第9个参数标记是否在上传完毕后自动close nativeImage  
+{: .prompt-tip }
+
+> 通过单个材质的方式实现的动态图片渲染要求所有图片的宽高必须相等(有不相等的部分应当用透明像素填充)。
+如果需要渲染多种不同宽高的图片且不方便填充透明像素，则应该使用多个不同的材质实现
+{: .prompt-warning }
