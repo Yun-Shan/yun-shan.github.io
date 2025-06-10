@@ -138,26 +138,26 @@ public void tick() {
 private void cycleAnimationFrames() {
     // 自行处理图片切换逻辑
     // 每次切换图片都应该调用下面的方法来更新材质
-    this.bind(); // 这个是父类中的方法
-    nativeImage.upload(0, 0, 0, 0, 0, imgWidth, imgHeight, false, false);
+    this.bind(); // 这个是父类中的方法，每次更新时调用一次来绑定当前要修改的纹理
+    nativeImage.upload(0, 0, 0, 0, 0, frameWidth, frameHeight, false, false);
+    // 注意：upload函数最后一个参数必须是false，否则会自动close导致无法进行下一次更新。
 }
 ```
-
-在`close`函数中：  
-对所有nativeImage调用close来释放内存
-
-**注意：`upload`函数最后一个参数必须是`false`，否则会频繁分配内存，对性能有负面影响。并且和普通图片材质一样，不再需要该材质后及时释放**
-
-*如果要优化性能，可以将所有不同的帧图片打包进一个png中，然后在更新的时候使用适当的参数从单个png中选择所需的矩形区域。*
-
 > `NativeImage.upload`的参数说明如下：  
 第1个参数是midMapLevel，一般不会为动图做midMap，所以一般为0，同时第8个参数midMap也为false  
 第2、3个参数用于纹理偏移(可以理解为数组复制的dstOffset)，通常为0即可(除非有只更新部分纹理的需求)  
 第4、5个参数用于图片偏移(可以理解为数组复制的srcOffset)，根据对应帧在完整图片中的位置提供  
-第6、7个参数为要更新的矩形区域的宽高，也就是每帧的宽高  
+第6、7个参数为要更新的矩形区域的宽高，如果更新整个图片则提供每帧的宽高即可  
 第8个参数标记是否是midMap  
 第9个参数标记是否在上传完毕后自动close nativeImage  
 {: .prompt-tip }
+
+在`close`函数中：  
+**对所有nativeImage调用close来释放内存**
+
+> 和普通图片材质一样，不再需要该材质后应及时调用`textureManager.release(loc)`释放资源(此时close函数会被调用)。  
+如果要进一步优化性能，可以将所有不同的帧图片打包进一个png中，然后在更新的时候使用适当的参数从单个png中选择所需的矩形区域。
+{: .prompt-info }
 
 > 通过单个材质的方式实现的动态图片渲染要求所有图片的宽高必须相等(有不相等的部分应当用透明像素填充)。
 如果需要渲染多种不同宽高的图片且不方便填充透明像素，则应该使用多个不同的材质实现
