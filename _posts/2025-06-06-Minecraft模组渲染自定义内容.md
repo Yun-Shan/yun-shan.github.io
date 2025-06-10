@@ -44,7 +44,7 @@ pose.popPose();
 ```
 
 
-## 渲染图片
+## 渲染静态图片
 
 对普通图片可以使用自带的DynamicTexture完成，通过如下方式注册材质：
 ```java
@@ -54,7 +54,10 @@ var loc = ResourceLocation.tryBuild(MOD_ID, texturePath);
 var texture = new DynamicTexture(NativeImage.read(pngData));
 Minecraft.getInstance().getTextureManager().register(loc, texture);
 ```
-> 材质注册一次即可，不再需要该材质后应及时调用textureManager.release(loc)释放资源
+> `NativeImage.read(byte[])`对较大图片的处理有问题，请尽量使用`NativeImage.read(InputString)`  
+{: .prompt-warning }
+
+> 材质注册一次即可，不再需要该材质后应及时调用textureManager.release(loc)释放资源  
 {: .prompt-warning }
 
 材质注册后在需要渲染的时候通过如下方式渲染：
@@ -67,9 +70,45 @@ Minecraft.getInstance().getTextureManager().register(loc, texture);
 graphics.blit(loc, x, y, width, height, uOffset, vOffset, uWidth, vHeight, textureWidth, textureHeight);
 ```
 
-### 渲染动态图片
+### 渲染动态图片(通过静态材质绘制部分区域的方式，推荐使用)
+在静态图片渲染的基础上，可以通过简单的范围渲染的方式实现动态图片。  
+流程如下：
+1. 把所有帧绘制到一张图片上
+2. 每次渲染前检查当前处于哪一帧，并得到当前帧在整张图片上的坐标偏移
+3. 根据坐标偏移绘制图片，参数参考上面的`graphics.blit`
 
-如果需要渲染动态图片，需要新建一个类继承AbstractTexture并实现Tickable，然后在tick函数中处理更新。  
+相关参数的伪代码参考如下(实际渲染时请注意尽量减少渲染期间的计算量)：
+```java
+var frameCount = ...;
+var frameWidth = ...;
+var frameHeight = ...;
+var frameTiming = ...;
+var rowCount = (int) Math.sqrt(frameCount);
+var textureWidth = width * rowCount;
+var textureHeight = height * Math.ceilDiv(frameCount, rowCount);
+
+var frameIdx = ...;
+var currentFrameStart = ...;
+checkFrame() {
+  if (System.currentTimeMillis() - currentFrameStart > frameTiming[frameIdx]) {
+    frameIdx = (frameIdx + 1) % frameTiming.length;
+    currentFrameStart = System.currentTimeMillis();
+    uOffset = (frameIdx % rowCount) * frameWidth;
+    vOffset = (frameIdx / rowCount) * frameHeight;
+  }
+}
+graphics.blit(resLoc,
+    x, y, width, height,
+    uOffset, vOffset, frameWidth, frameHeight,
+    textureWidth, textureHeight
+);
+```
+
+### 渲染动态图片(通过动态材质的方式)
+> 动态材质的方式由于是通过tick进行帧更新的，最低精度显然是1tick=50ms，如果需要更高精度的帧持续时间，应该使用静态材质绘制部分区域的方式  
+{: .prompt-tip }
+
+如果要通过动态材质的方式渲染动态图片，需要新建一个类继承AbstractTexture并实现Tickable，然后在tick函数中处理更新。  
 一个简单的方式是对每个不同的图片都创建一个NativeImage，并记录每个图片显示的tick时长。相关逻辑如下：
 
 在构造函数中：
